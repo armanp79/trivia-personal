@@ -1,0 +1,277 @@
+import React, { Component } from 'react';
+import questions_array from '../questions'
+import './css/Main.css'
+
+const num_questions = 5;
+
+class Main extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            questions : [],
+            total_q : num_questions,
+            current_q : 0,
+            score : 0,
+            user_choice : null,
+            user_choice_check : false,
+            submit_clicked : false,
+            classNames : ['choicesbtn','choicesbtn','choicesbtn','choicesbtn'],
+            correct_check: false
+        };
+
+        let updatedClass = [];
+
+        this.submitRef = React.createRef();
+        this.optionRef1 = React.createRef();
+        this.optionRef2 = React.createRef();
+        this.optionRef3 = React.createRef();
+        this.optionRef4 = React.createRef();
+
+        this.DisplayQuestion = this.DisplayQuestion.bind(this)
+        this.DisplayOptions = this.DisplayOptions.bind(this)
+        this.DisplaySubmit = this.DisplaySubmit.bind(this)
+        this.DisplayAnswer = this.DisplayAnswer.bind(this)
+        this.DisplayNext = this.DisplayNext.bind(this)
+        this.DisplayStartOver = this.DisplayStartOver.bind(this)
+        
+        this.handleChoice = this.handleChoice.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
+        this.handleNext = this.handleNext.bind(this)
+        this.handleStartOver = this.handleStartOver.bind(this)
+        this.generateQArray = this.generateQArray.bind(this)
+        
+    }
+
+    generateQArray () {
+        let q = new Set();
+        let rand = 0;
+        while (q.size < num_questions)
+        {
+            rand = Math.floor(Math.random() * (questions_array.length));
+            q.add(questions_array[rand]);
+        }
+
+        var set_iterator = q.entries();
+        for (let i =0; i < q.size; i++)
+        {
+            this.state.questions.push(set_iterator.next().value[0])
+        }
+
+    }
+
+    
+
+    handleChoice(props) {
+        this.setState({user_choice_check : true})
+        this.state.user_choice = props
+    }
+
+    handleSubmit () {
+        this.checkAnswer();
+        this.setState({
+            submit_clicked : true,
+            classNames : this.updatedClass
+        })
+        this.submitRef.current.setAttribute("disabled", "disabled");
+        this.optionRef1.current.setAttribute("disabled", "disabled");
+        this.optionRef2.current.setAttribute("disabled", "disabled");
+        this.optionRef3.current.setAttribute("disabled", "disabled");
+        this.optionRef4.current.setAttribute("disabled", "disabled");
+        
+    }
+
+    handleNext () {
+        this.setState((state) => {
+            return {current_q: state.current_q + 1, user_choice_check : false, correct_check : false,
+                submit_clicked : false, classNames: ['choicesbtn','choicesbtn','choicesbtn','choicesbtn']};
+          });
+          this.submitRef.current.removeAttribute("disabled");
+          this.optionRef1.current.removeAttribute("disabled");
+          this.optionRef2.current.removeAttribute("disabled");
+          this.optionRef3.current.removeAttribute("disabled");
+          this.optionRef4.current.removeAttribute("disabled");
+    }
+
+    handleStartOver () {
+        this.setState((state) => {
+            return {questions : [],
+                total_q : num_questions,
+                current_q : 0,
+                score : 0,
+                user_choice : null,
+                user_choice_check : false,
+                submit_clicked : false,
+                classNames : ['choicesbtn','choicesbtn','choicesbtn','choicesbtn'],
+                correct_check: false};
+          });
+
+          this.submitRef.current.removeAttribute("disabled");
+          this.optionRef1.current.removeAttribute("disabled");
+          this.optionRef2.current.removeAttribute("disabled");
+          this.optionRef3.current.removeAttribute("disabled");
+          this.optionRef4.current.removeAttribute("disabled");
+    }
+
+
+
+    DisplayQuestion () {
+        if (this.state.current_q === 0) {
+            {this.generateQArray()}
+        }
+        return (
+            <div className = "question">
+                {this.state.questions[this.state.current_q]['question']}
+            </div>
+        )
+    }
+
+    DisplayOptions () {
+        return (
+            <div className = "a1">
+                <div className = "a1">
+                    <button ref = {this.optionRef1} className={this.state.classNames[0]} onClick={() => this.handleChoice(0)}>
+                    {this.state.questions[this.state.current_q]['choices'][0]}
+                    </button>
+                
+
+                    <button ref = {this.optionRef2} className={this.state.classNames[1]} onClick={() => this.handleChoice(1)}>
+                    {this.state.questions[this.state.current_q]['choices'][1]}
+                    </button>
+                </div>
+
+                <div className = "a2">
+                    <button ref = {this.optionRef3} className={this.state.classNames[2]} onClick={() => this.handleChoice(2)}>
+                    {this.state.questions[this.state.current_q]['choices'][2]}
+                    </button>
+
+                    <button ref = {this.optionRef4} className={this.state.classNames[3]} onClick={() => this.handleChoice(3)}>
+                    {this.state.questions[this.state.current_q]['choices'][3]}
+                    </button>
+
+                </div>
+            </div>
+            
+        )
+    }
+
+
+    DisplaySubmit () {
+        return (
+            <div>
+                <button ref = {this.submitRef} className="submit" onClick={() => this.handleSubmit()}>
+                Submit Answer
+                </button>
+            </div>
+        )
+    }
+
+    DisplayNext() {
+        return (
+            <div>
+                <button className="submit" onClick={() => this.handleNext()}>
+                Next Question
+                </button>
+            </div>
+        )
+    }
+
+    DisplayStartOver() {
+        return (
+            <div>
+                <button className="submit" onClick={() => this.handleStartOver()}>
+                Try Again?
+                </button>
+            </div>
+        )
+    }
+
+
+
+    checkAnswer () {
+        if (this.state.questions[this.state.current_q]['choices'][this.state.user_choice] === this.state.questions[this.state.current_q]['answer'])
+        {
+            this.updatedClass[this.state.user_choice] = 'right';
+            this.setState({
+                correct_check : true
+            })
+        }
+        else
+        {
+            this.updatedClass[this.state.user_choice] = 'wrong' 
+        }
+    }
+
+    DisplayAnswer () {
+        this.updatedClass = this.state.classNames
+        if (this.state.submit_clicked === false)
+        {
+            return ( <div></div> )
+        }
+        else if (this.state.questions[this.state.current_q]['choices'][this.state.user_choice] === this.state.questions[this.state.current_q]['answer'])
+        {
+            if (this.state.current_q === this.state.total_q - 1)
+            {
+                this.state.score += 1
+                return (
+                    <div className = "answer">
+                        <h4>Correct!</h4>
+                        <h4>Final Score: {this.state.score}</h4>
+                        <this.DisplayStartOver /> 
+                    </div>
+                )
+            }
+            else
+            {
+                this.state.score += 1
+                return (
+                <div className = "answer"> 
+                    <h4>Correct!</h4>
+                    <this.DisplayNext />
+                </div>)
+            }
+        }
+        else
+        {
+            if (this.state.current_q === this.state.total_q - 1)
+            {
+                return (
+                    <div className = "answer">
+                        <h4>Sorry, the correct answer is {this.state.questions[this.state.current_q]['answer']}</h4>
+                        <h4>Final Score: {this.state.score}</h4>
+                        <this.DisplayStartOver /> 
+                    </div>)
+            }
+            else
+            {
+                return (
+                    <div className = "answer">
+                        <h4>Sorry, the correct answer is {this.state.questions[this.state.current_q]['answer']}</h4>
+                        <this.DisplayNext />
+                    </div>)
+            }
+        }
+        
+    }
+
+
+
+
+    render() {
+        return <>
+            <div>
+                <div className = 'qArea'>
+                     <p>Question {this.state.current_q + 1} :</p>
+                    <this.DisplayQuestion />
+                </div>
+                <this.DisplayOptions />
+
+                {this.state.user_choice_check ? <div> <this.DisplaySubmit /></div> : <div></div> }
+                <this.DisplayAnswer />
+                   
+            </div>
+        </>
+    }
+}
+
+export default Main;
+
